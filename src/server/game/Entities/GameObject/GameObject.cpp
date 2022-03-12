@@ -2130,7 +2130,7 @@ void GameObject::Use(Unit* user)
 
     if (!spellId)
         return;
-
+    // Check point 1
     if (!sSpellMgr->GetSpellInfo(spellId))
     {
         if (user->GetTypeId() != TYPEID_PLAYER || !sOutdoorPvPMgr->HandleCustomSpell(user->ToPlayer(), spellId, this))
