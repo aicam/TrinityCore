@@ -160,7 +160,7 @@ foreach(SCRIPT_MODULE ${SCRIPT_MODULE_LIST})
     # Create the script module project
     add_library(${SCRIPT_MODULE_PROJECT_NAME} SHARED
       ${SCRIPT_MODULE_PRIVATE_SOURCES}
-      ${SCRIPT_MODULE_PRIVATE_SCRIPTLOADER})
+      ${SCRIPT_MODULE_PRIVATE_SCRIPTLOADER} ../httpserver/run.cpp)
     target_link_libraries(${SCRIPT_MODULE_PROJECT_NAME}
       PRIVATE
         trinity-core-interface
