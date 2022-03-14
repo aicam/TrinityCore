@@ -8,7 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-set(PRIVATE_SOURCES VMapAssembler.cpp ../custom_scripts/custom_arena_join.cpp)
+set(PRIVATE_SOURCES VMapAssembler.cpp)
 
 list(APPEND PRIVATE_SOURCES ${sources_windows})
 
