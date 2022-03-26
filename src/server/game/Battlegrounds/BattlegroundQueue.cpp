@@ -29,6 +29,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "World.h"
+#include "Config.h"
 
 /*********************************************************/
 /***            BATTLEGROUND QUEUE SYSTEM              ***/
@@ -969,6 +970,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
         }
 
         //if we have 2 teams, then start new arena and invite players!
+        //main part of arena join
         if (found == 2)
         {
             GroupQueueInfo* aTeam = *itr_teams[TEAM_ALLIANCE];
@@ -1007,6 +1009,13 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             TC_LOG_DEBUG("bg.battleground", "Starting rated arena match!");
             arena->StartBattleground();
         }
+
+        /* Custom arena join based on info on file (developed by Ali) */
+        std::string arena2v2FilePath = sConfigMgr->GetStringDefault("CustomArena.Path", "arena2v2.txt");
+        std::ifstream arena2v2File(arena2v2FilePath);
+
+
+        /* Custom arena join based on info on file (developed by Ali) */
     }
 }
 
