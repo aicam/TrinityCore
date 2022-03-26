@@ -1019,6 +1019,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             std::string fileLineTxt;
             std::string substr;
 
+
             while (getline(arena2v2File, fileLineTxt)) {
                 std::stringstream ss(fileLineTxt);
                 while (ss.good()) {
