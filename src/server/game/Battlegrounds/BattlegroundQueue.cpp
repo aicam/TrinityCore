@@ -1014,6 +1014,22 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
         std::string arena2v2FilePath = sConfigMgr->GetStringDefault("CustomArena.Path", "arena2v2.txt");
         std::ifstream arena2v2File(arena2v2FilePath);
 
+        std::vector <std::string> betTeamVars;
+        std::string fileLineTxt;
+        std::string substr;
+
+        while (getline(arena2v2File, fileLineTxt)) {
+            std::stringstream ss(fileLineTxt);
+            while (ss.good()) {
+                getline(ss, substr, ',');
+                betTeamVars.push_back(substr);
+            }
+        }
+
+        // end if there is no team in queue
+        if (betTeamVars.size() < 6)
+            return;
+
 
         /* Custom arena join based on info on file (developed by Ali) */
     }
