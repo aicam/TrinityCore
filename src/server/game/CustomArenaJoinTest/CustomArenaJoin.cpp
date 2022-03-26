@@ -27,29 +27,33 @@ int main() {
         }
     }
     are2v2File.close();
-
-    uint32 ArenaTeamId;
-    {
-        stringstream v0(v[5]);
-        int x = 0;
-        v0 >> x;
-        ArenaTeamId = x;
+    for (int i = 0; i < v.size(); i += 6) {
+        cout << "leaderNameTeam1 " << v[i + 1] << endl;
+        cout << "leaderNameTeam2 " << v[i + 3] << endl;
+        cout << "BattlegroundTypeId " << v[i + 4] << endl;
     }
-    if (ArenaTeamId != 1234) {
-        cout << ArenaTeamId << "\n" << "error";
-    }
-
-    {
-        stringstream v0(v[11]);
-        int x = 0;
-        v0 >> x;
-        ArenaTeamId = x;
-    }
-    if (ArenaTeamId != 1234) {
-        cout << ArenaTeamId << "\n" << "error";
-    }
-    cout << v.size() << endl;
-    ofs.open(path, ios::out | ios::trunc);
-    ofs.close();
+//    uint32 ArenaTeamId;
+//    {
+//        stringstream v0(v[5]);
+//        int x = 0;
+//        v0 >> x;
+//        ArenaTeamId = x;
+//    }
+//    if (ArenaTeamId != 1234) {
+//        cout << ArenaTeamId << "\n" << "error";
+//    }
+//
+//    {
+//        stringstream v0(v[11]);
+//        int x = 0;
+//        v0 >> x;
+//        ArenaTeamId = x;
+//    }
+//    if (ArenaTeamId != 1234) {
+//        cout << ArenaTeamId << "\n" << "error";
+//    }
+//    cout << v.size() << endl;
+//    ofs.open(path, ios::out | ios::trunc);
+//    ofs.close();
 
 }

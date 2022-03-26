@@ -1031,22 +1031,35 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             // end if there is no team in queue
             if (betTeamVars.size() < 6)
                 return;
+            // iterate over queued teams for bet
+            for (int i = 0; i < betTeamVars.size(); i += 6) {
+                // find leader players by name
+                std::string leaderNameTeam1 = betTeamVars[i + 1];
+                Player *leaderPlayerTeam1 = ObjectAccessor::FindPlayerByName(leaderNameTeam1);
+                std::string leaderNameTeam2 = betTeamVars[i + 3];
+                Player *leaderPlayerTeam2 = ObjectAccessor::FindPlayerByName(leaderNameTeam2);
 
-            // find leader players by name
-            std::string leaderNameTeam1 = betTeamVars[1];
-            Player *leaderPlayerTeam1 = ObjectAccessor::FindPlayerByName(leaderNameTeam1);
-            std::string leaderNameTeam2 = betTeamVars[3];
-            Player *leaderPlayerTeam2 = ObjectAccessor::FindPlayerByName(leaderNameTeam2);
+                GroupQueueInfo *aTeam;
+                GroupQueueInfo *hTeam;
 
-            GroupQueueInfo *aTeam;
-            GroupQueueInfo *hTeam;
+                // set default values
+                aTeam->IsRated = true;
+                hTeam->IsRated = true;
+                aTeam->Players.clear();
+                hTeam->Players.clear();
+                aTeam->IsInvitedToBGInstanceGUID = 0;
+                hTeam->IsInvitedToBGInstanceGUID = 0;
+                aTeam->JoinTime = GameTime::GetGameTimeMS();
+                hTeam->JoinTime = GameTime::GetGameTimeMS();
+                aTeam->RemoveInviteTime = 0;
+                hTeam->RemoveInviteTime = 0;
+                aTeam->Team = leaderPlayerTeam1->GetTeam();
+                hTeam->Team = leaderPlayerTeam2->GetTeam();
 
-            // set default values
-            aTeam->IsRated = true; hTeam->IsRated = true;
-            aTeam->IsInvitedToBGInstanceGUID = 0; hTeam->IsInvitedToBGInstanceGUID = 0;
-            aTeam->JoinTime = GameTime::GetGameTimeMS(); hTeam->JoinTime = GameTime::GetGameTimeMS();
-            aTeam->RemoveInviteTime = 0; hTeam->RemoveInviteTime = 0;
-            aTeam->Team = leaderPlayerTeam1->GetTeam(); hTeam->Team = leaderPlayerTeam2->GetTeam();
+                // get group of team so we can add players to Players var in groupqueueinfo
+                Group *grpTeam1 = leaderPlayerTeam1->GetGroup();
+                Group *grpTeam2 = leaderPlayerTeam2->GetGroup();
+            }
 
         }
         /* Custom arena join based on info on file (developed by Ali) */
