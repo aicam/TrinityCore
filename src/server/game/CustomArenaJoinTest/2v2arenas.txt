@@ -1,1 +1,1 @@
-# GroupQueueInfo: BattlegroundTypeId,bracketEntry,ArenaTeamId-P1,LeaderName-P1,ArenaTeamId-P2,LeaderName-P2
+# GroupQueueInfo: ArenaTeamId-P1,LeaderName-P1,ArenaTeamId-P2,LeaderName-P2,BattlegroundTypeId,bracketEntry

@@ -1011,26 +1011,44 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
         }
 
         /* Custom arena join based on info on file (developed by Ali) */
-        std::string arena2v2FilePath = sConfigMgr->GetStringDefault("CustomArena.Path", "arena2v2.txt");
-        std::ifstream arena2v2File(arena2v2FilePath);
+        {
+            std::string arena2v2FilePath = sConfigMgr->GetStringDefault("CustomArena.Path", "arena2v2.txt");
+            std::ifstream arena2v2File(arena2v2FilePath);
 
-        std::vector <std::string> betTeamVars;
-        std::string fileLineTxt;
-        std::string substr;
+            std::vector<std::string> betTeamVars;
+            std::string fileLineTxt;
+            std::string substr;
 
-        while (getline(arena2v2File, fileLineTxt)) {
-            std::stringstream ss(fileLineTxt);
-            while (ss.good()) {
-                getline(ss, substr, ',');
-                betTeamVars.push_back(substr);
+            while (getline(arena2v2File, fileLineTxt)) {
+                std::stringstream ss(fileLineTxt);
+                while (ss.good()) {
+                    getline(ss, substr, ',');
+                    betTeamVars.push_back(substr);
+                }
             }
+            arena2v2File.close();
+
+            // end if there is no team in queue
+            if (betTeamVars.size() < 6)
+                return;
+
+            // find leader players by name
+            std::string leaderNameTeam1 = betTeamVars[1];
+            Player *leaderPlayerTeam1 = ObjectAccessor::FindPlayerByName(leaderNameTeam1);
+            std::string leaderNameTeam2 = betTeamVars[3];
+            Player *leaderPlayerTeam2 = ObjectAccessor::FindPlayerByName(leaderNameTeam2);
+
+            GroupQueueInfo *aTeam;
+            GroupQueueInfo *hTeam;
+
+            // set default values
+            aTeam->IsRated = true; hTeam->IsRated = true;
+            aTeam->IsInvitedToBGInstanceGUID = 0; hTeam->IsInvitedToBGInstanceGUID = 0;
+            aTeam->JoinTime = GameTime::GetGameTimeMS(); hTeam->JoinTime = GameTime::GetGameTimeMS();
+            aTeam->RemoveInviteTime = 0; hTeam->RemoveInviteTime = 0;
+            aTeam->Team = leaderPlayerTeam1->GetTeam(); hTeam->Team = leaderPlayerTeam2->GetTeam();
+
         }
-
-        // end if there is no team in queue
-        if (betTeamVars.size() < 6)
-            return;
-
-
         /* Custom arena join based on info on file (developed by Ali) */
     }
 }
