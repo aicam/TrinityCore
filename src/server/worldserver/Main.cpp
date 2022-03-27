@@ -374,7 +374,9 @@ extern int main(int argc, char** argv)
     }
 
     TC_LOG_INFO("server.worldserver", "%s (worldserver-daemon with custome arena) ready...", GitRevision::GetFullVersion());
-
+    // custom arena
+    TC_LOG_INFO("server.worldserver", "custom arena file path %s", sWorld->customArenaPath.c_str());
+    TC_LOG_DEBUG("bg.custom", "custom arena file path %s", sWorld->customArenaPath.c_str());
     sScriptMgr->OnStartup();
 
     // Launch CliRunnable thread

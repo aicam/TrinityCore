@@ -1174,7 +1174,7 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
     // end if there is no team in queue
     if (betTeamVars.size() < 7)
         return;
-    TC_LOG_DEBUG("bg.custom", "arena custom file path %s", arenaFilePath.c_str());
+    TC_LOG_INFO("server.worldserver", "arena custom file path %s", arenaFilePath.c_str());
 
     // clear file
     std::fstream ofs;
@@ -1236,7 +1236,7 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
             bgTypeIdCustom = BattlegroundTypeId(x);
         }
 
-        TC_LOG_DEBUG("bg.custom",
+        TC_LOG_INFO("server.worldserver",
                      "Team Id 1 %u - Team Id 2 %u - Leader Name 1 %s - Leader Name 2 %s - Arena Type %u - bg Type %u",
                      ArenaTeamId1, ArenaTeamId2, leaderNameTeam1.c_str(), leaderNameTeam2.c_str(), arenaTypeCustom,
                      bgTypeIdCustom);
@@ -1280,7 +1280,7 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         aTeamBet->OpponentsMatchmakerRating = hTeamBet->ArenaMatchmakerRating;
         hTeamBet->OpponentsMatchmakerRating = aTeamBet->ArenaMatchmakerRating;
 
-        TC_LOG_DEBUG("bg.custom", "Alliance Team rating %u - Horde Team rating %u", aTeamBet->ArenaTeamRating,
+        TC_LOG_INFO("server.worldserver", "Alliance Team rating %u - Horde Team rating %u", aTeamBet->ArenaTeamRating,
                      hTeamBet->ArenaTeamRating);
 
         // add players to group queue
