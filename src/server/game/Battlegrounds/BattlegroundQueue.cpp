@@ -971,6 +971,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
         /* Custom arena join based on info on file (developed by Ali) */
         {
             std::string arenaFilePath = sWorld->customArenaPath;
+            TC_LOG_DEBUG("bg.custom", "arena custom file path %s", arenaFilePath.c_str());
             std::ifstream arenaFile(arenaFilePath);
 
             std::vector<std::string> betTeamVars;
