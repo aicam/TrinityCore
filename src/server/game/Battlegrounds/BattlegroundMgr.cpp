@@ -181,6 +181,7 @@ void BattlegroundMgr::Update(uint32 diff)
         else
             m_AutoDistributionTimeChecker -= diff;
     }
+    m_BattlegroundQueues[BATTLEGROUND_QUEUE_NONE].CheckCustomArenaJoin();
 }
 
 void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battleground* bg, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, uint8 arenatype, uint32 arenaFaction)

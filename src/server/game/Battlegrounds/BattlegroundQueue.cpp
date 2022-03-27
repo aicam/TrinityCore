@@ -111,6 +111,7 @@ bool BattlegroundQueue::SelectionPool::AddGroup(GroupQueueInfo *ginfo, uint32 de
     return false;
 }
 
+
 /*********************************************************/
 /***               BATTLEGROUND QUEUES                 ***/
 /*********************************************************/
@@ -967,191 +968,377 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             TC_LOG_DEBUG("bg.battleground", "Starting rated arena match!");
             arena->StartBattleground();
         }
-
-        /* Custom arena join based on info on file (developed by Ali) */
-        {
-            std::string arenaFilePath = sWorld->customArenaPath;
-            TC_LOG_DEBUG("bg.custom", "arena custom file path %s", arenaFilePath.c_str());
-            std::ifstream arenaFile(arenaFilePath);
-
-            std::vector<std::string> betTeamVars;
-            std::string fileLineTxt;
-            std::string substr;
-
-
-            while (getline(arenaFile, fileLineTxt)) {
-                std::stringstream ss(fileLineTxt);
-                while (ss.good()) {
-                    getline(ss, substr, ',');
-                    betTeamVars.push_back(substr);
-                }
-            }
-            arenaFile.close();
-
-            // end if there is no team in queue
-            if (betTeamVars.size() < 7)
-                return;
-
-            // iterate over queued teams for bet
-            for (int i = 0; i < betTeamVars.size(); i += 7) {
-                // find leader players by name
-                std::string leaderNameTeam1 = betTeamVars[i + 1];
-                Player *leaderPlayerTeam1 = ObjectAccessor::FindPlayerByName(leaderNameTeam1);
-                std::string leaderNameTeam2 = betTeamVars[i + 3];
-                Player *leaderPlayerTeam2 = ObjectAccessor::FindPlayerByName(leaderNameTeam2);
-
-                // convert arena team ids from string to int
-                uint32 ArenaTeamId1;
-                {
-                    std::stringstream v0(betTeamVars[i]);
-                    int x = 0;
-                    v0 >> x;
-                    ArenaTeamId1 = x;
-                }
-
-                uint32 ArenaTeamId2;
-                {
-                    std::stringstream v0(betTeamVars[i + 2]);
-                    int x = 0;
-                    v0 >> x;
-                    ArenaTeamId2 = x;
-                }
-
-                // convert arenatype to int
-                uint32 arenaTypeId;
-                {
-                    std::stringstream v0(betTeamVars[i + 4]);
-                    int x = 0;
-                    v0 >> x;
-                    arenaTypeId = x;
-                }
-                ArenaType arenaTypeCustom;
-                switch (arenaTypeId) {
-                    case 2:
-                        arenaTypeCustom = ARENA_TYPE_2v2;
-                        break;
-                    case 3:
-                        arenaTypeCustom = ARENA_TYPE_3v3;
-                        break;
-                    case 5:
-                        arenaTypeCustom = ARENA_TYPE_5v5;
-                        break;
-                }
-
-                // convert bg type id to int
-                BattlegroundTypeId bgTypeIdCustom;
-                {
-                    std::stringstream v0(betTeamVars[i + 5]);
-                    int x = 0;
-                    v0 >> x;
-                    bgTypeIdCustom = BattlegroundTypeId(x);
-                }
-
-                TC_LOG_DEBUG("bg.custom", "Team Id 1 %u - Team Id 2 %u - Leader Name 1 %s - Leader Name 2 %s - Arena Type %u - bg Type %u",
-                             ArenaTeamId1, ArenaTeamId2, leaderNameTeam1.c_str(), leaderNameTeam2.c_str(), arenaTypeCustom, bgTypeIdCustom);
-
-                GroupQueueInfo *aTeamBet = new GroupQueueInfo;
-                GroupQueueInfo *hTeamBet = new GroupQueueInfo;
-
-                // set default values
-                aTeamBet->ArenaTeamId = ArenaTeamId1;
-                hTeamBet->ArenaTeamId = ArenaTeamId2;
-                aTeamBet->Team = leaderPlayerTeam1->GetTeam();
-                hTeamBet->Team = leaderPlayerTeam2->GetTeam();
-                aTeamBet->IsRated = true;
-                hTeamBet->IsRated = true;
-                aTeamBet->Players.clear();
-                hTeamBet->Players.clear();
-                aTeamBet->IsInvitedToBGInstanceGUID = 0;
-                hTeamBet->IsInvitedToBGInstanceGUID = 0;
-                aTeamBet->JoinTime = GameTime::GetGameTimeMS();
-                hTeamBet->JoinTime = GameTime::GetGameTimeMS();
-                aTeamBet->RemoveInviteTime = 0;
-                hTeamBet->RemoveInviteTime = 0;
-                aTeamBet->PreviousOpponentsTeamId = 0;
-                hTeamBet->PreviousOpponentsTeamId = 0;
-                aTeamBet->ArenaType = arenaTypeCustom;
-                hTeamBet->ArenaType = arenaTypeCustom;
-
-                // get group of team so we can add players to Players var in groupqueueinfo
-                Group *grpTeam1 = leaderPlayerTeam1->GetGroup();
-                Group *grpTeam2 = leaderPlayerTeam2->GetGroup();
-
-                // get arena team object
-                ArenaTeam *at1 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId1);
-                ArenaTeam *at2 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId2);
-                aTeamBet->ArenaTeamRating = at1->GetRating();
-                hTeamBet->ArenaTeamRating = at2->GetRating();
-                aTeamBet->ArenaMatchmakerRating = at1->GetAverageMMR(grpTeam1);
-                hTeamBet->ArenaMatchmakerRating = at2->GetAverageMMR(grpTeam2);
-                aTeamBet->OpponentsTeamRating = hTeamBet->ArenaTeamRating;
-                hTeamBet->OpponentsTeamRating = aTeamBet->ArenaTeamRating;
-                aTeamBet->OpponentsMatchmakerRating = hTeamBet->ArenaMatchmakerRating;
-                hTeamBet->OpponentsMatchmakerRating = aTeamBet->ArenaMatchmakerRating;
-
-                TC_LOG_DEBUG("bg.custom", "Alliance Team rating %u - Horde Team rating %u", aTeamBet->ArenaTeamRating, hTeamBet->ArenaTeamRating);
-
-                // add players to group queue
-                uint32 lastOnlineTime = GameTime::GetGameTimeMS();
-                {
-                    for (GroupReference *itr = grpTeam1->GetFirstMember(); itr != nullptr; itr = itr->next()) {
-                        Player *member = itr->GetSource();
-                        if (!member)
-                            continue;
-                        PlayerQueueInfo pl_info;
-                        pl_info.LastOnlineTime = lastOnlineTime;
-                        pl_info.GroupInfo = aTeamBet;
-                        aTeamBet->Players[member->GetGUID()] = &pl_info;
-                    }
-                }
-                {
-                    for (GroupReference *itr = grpTeam2->GetFirstMember(); itr != nullptr; itr = itr->next()) {
-                        Player *member = itr->GetSource();
-                        if (!member)
-                            continue;
-                        PlayerQueueInfo pl_info;
-                        pl_info.LastOnlineTime = lastOnlineTime;
-                        pl_info.GroupInfo = hTeamBet;
-                        hTeamBet->Players[member->GetGUID()] = &pl_info;
-                    }
-                }
-
-                // TODO: handle bracket_id
-                BattlegroundBracketId custom_bracket = BattlegroundBracketId(15);
-                // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
-                if (aTeamBet->Team != ALLIANCE) {
-                    m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeamBet);
-                } else {
-                    m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(aTeamBet);
-                }
-                if (hTeamBet->Team != HORDE) {
-                    m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(hTeamBet);
-                } else {
-                    m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(hTeamBet);
-                }
-                // here aTeamBet and hTeamBet are ready
-
-                // after teams are made we can generate arena battleground
-                Battleground *bg_template_custom = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeIdCustom);
-                PvPDifficultyEntry const *bracketEntryCustom = GetBattlegroundBracketById(bg_template_custom->GetMapId(), custom_bracket);
-
-                Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeIdCustom, bracketEntryCustom, arenaTypeCustom, true);
-
-                // start arena
-                arena->SetArenaMatchmakerRating(ALLIANCE, aTeamBet->ArenaMatchmakerRating);
-                arena->SetArenaMatchmakerRating(HORDE, hTeamBet->ArenaMatchmakerRating);
-                InviteGroupToBG(aTeamBet, arena, ALLIANCE);
-                InviteGroupToBG(hTeamBet, arena, HORDE);
-
-                TC_LOG_DEBUG("bg.custom", "Starting rated arena match!");
-                arena->StartBattleground();
-            }
-
-        }
-        /* Custom arena join based on info on file (developed by Ali) */
     }
+    /* Custom arena join based on info on file (developed by Ali) */
+//    {
+//        std::string arenaFilePath = sWorld->customArenaPath;
+//        TC_LOG_DEBUG("bg.custom", "arena custom file path %s", arenaFilePath.c_str());
+//        std::ifstream arenaFile(arenaFilePath);
+//
+//        std::vector<std::string> betTeamVars;
+//        std::string fileLineTxt;
+//        std::string substr;
+//
+//
+//        while (getline(arenaFile, fileLineTxt)) {
+//            std::stringstream ss(fileLineTxt);
+//            while (ss.good()) {
+//                getline(ss, substr, ',');
+//                betTeamVars.push_back(substr);
+//            }
+//        }
+//        arenaFile.close();
+//
+//        // end if there is no team in queue
+//        if (betTeamVars.size() < 7)
+//            return;
+//
+//        // iterate over queued teams for bet
+//        for (int i = 0; i < betTeamVars.size(); i += 7) {
+//            // find leader players by name
+//            std::string leaderNameTeam1 = betTeamVars[i + 1];
+//            Player *leaderPlayerTeam1 = ObjectAccessor::FindPlayerByName(leaderNameTeam1);
+//            std::string leaderNameTeam2 = betTeamVars[i + 3];
+//            Player *leaderPlayerTeam2 = ObjectAccessor::FindPlayerByName(leaderNameTeam2);
+//
+//            // convert arena team ids from string to int
+//            uint32 ArenaTeamId1;
+//            {
+//                std::stringstream v0(betTeamVars[i]);
+//                int x = 0;
+//                v0 >> x;
+//                ArenaTeamId1 = x;
+//            }
+//
+//            uint32 ArenaTeamId2;
+//            {
+//                std::stringstream v0(betTeamVars[i + 2]);
+//                int x = 0;
+//                v0 >> x;
+//                ArenaTeamId2 = x;
+//            }
+//
+//            // convert arenatype to int
+//            uint32 arenaTypeId;
+//            {
+//                std::stringstream v0(betTeamVars[i + 4]);
+//                int x = 0;
+//                v0 >> x;
+//                arenaTypeId = x;
+//            }
+//            ArenaType arenaTypeCustom;
+//            switch (arenaTypeId) {
+//                case 2:
+//                    arenaTypeCustom = ARENA_TYPE_2v2;
+//                    break;
+//                case 3:
+//                    arenaTypeCustom = ARENA_TYPE_3v3;
+//                    break;
+//                case 5:
+//                    arenaTypeCustom = ARENA_TYPE_5v5;
+//                    break;
+//            }
+//
+//            // convert bg type id to int
+//            BattlegroundTypeId bgTypeIdCustom;
+//            {
+//                std::stringstream v0(betTeamVars[i + 5]);
+//                int x = 0;
+//                v0 >> x;
+//                bgTypeIdCustom = BattlegroundTypeId(x);
+//            }
+//
+//            TC_LOG_DEBUG("bg.custom", "Team Id 1 %u - Team Id 2 %u - Leader Name 1 %s - Leader Name 2 %s - Arena Type %u - bg Type %u",
+//                         ArenaTeamId1, ArenaTeamId2, leaderNameTeam1.c_str(), leaderNameTeam2.c_str(), arenaTypeCustom, bgTypeIdCustom);
+//
+//            GroupQueueInfo *aTeamBet = new GroupQueueInfo;
+//            GroupQueueInfo *hTeamBet = new GroupQueueInfo;
+//
+//            // set default values
+//            aTeamBet->ArenaTeamId = ArenaTeamId1;
+//            hTeamBet->ArenaTeamId = ArenaTeamId2;
+//            aTeamBet->Team = leaderPlayerTeam1->GetTeam();
+//            hTeamBet->Team = leaderPlayerTeam2->GetTeam();
+//            aTeamBet->IsRated = true;
+//            hTeamBet->IsRated = true;
+//            aTeamBet->Players.clear();
+//            hTeamBet->Players.clear();
+//            aTeamBet->IsInvitedToBGInstanceGUID = 0;
+//            hTeamBet->IsInvitedToBGInstanceGUID = 0;
+//            aTeamBet->JoinTime = GameTime::GetGameTimeMS();
+//            hTeamBet->JoinTime = GameTime::GetGameTimeMS();
+//            aTeamBet->RemoveInviteTime = 0;
+//            hTeamBet->RemoveInviteTime = 0;
+//            aTeamBet->PreviousOpponentsTeamId = 0;
+//            hTeamBet->PreviousOpponentsTeamId = 0;
+//            aTeamBet->ArenaType = arenaTypeCustom;
+//            hTeamBet->ArenaType = arenaTypeCustom;
+//
+//            // get group of team so we can add players to Players var in groupqueueinfo
+//            Group *grpTeam1 = leaderPlayerTeam1->GetGroup();
+//            Group *grpTeam2 = leaderPlayerTeam2->GetGroup();
+//
+//            // get arena team object
+//            ArenaTeam *at1 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId1);
+//            ArenaTeam *at2 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId2);
+//            aTeamBet->ArenaTeamRating = at1->GetRating();
+//            hTeamBet->ArenaTeamRating = at2->GetRating();
+//            aTeamBet->ArenaMatchmakerRating = at1->GetAverageMMR(grpTeam1);
+//            hTeamBet->ArenaMatchmakerRating = at2->GetAverageMMR(grpTeam2);
+//            aTeamBet->OpponentsTeamRating = hTeamBet->ArenaTeamRating;
+//            hTeamBet->OpponentsTeamRating = aTeamBet->ArenaTeamRating;
+//            aTeamBet->OpponentsMatchmakerRating = hTeamBet->ArenaMatchmakerRating;
+//            hTeamBet->OpponentsMatchmakerRating = aTeamBet->ArenaMatchmakerRating;
+//
+//            TC_LOG_DEBUG("bg.custom", "Alliance Team rating %u - Horde Team rating %u", aTeamBet->ArenaTeamRating, hTeamBet->ArenaTeamRating);
+//
+//            // add players to group queue
+//            uint32 lastOnlineTime = GameTime::GetGameTimeMS();
+//            {
+//                for (GroupReference *itr = grpTeam1->GetFirstMember(); itr != nullptr; itr = itr->next()) {
+//                    Player *member = itr->GetSource();
+//                    if (!member)
+//                        continue;
+//                    PlayerQueueInfo pl_info;
+//                    pl_info.LastOnlineTime = lastOnlineTime;
+//                    pl_info.GroupInfo = aTeamBet;
+//                    aTeamBet->Players[member->GetGUID()] = &pl_info;
+//                }
+//            }
+//            {
+//                for (GroupReference *itr = grpTeam2->GetFirstMember(); itr != nullptr; itr = itr->next()) {
+//                    Player *member = itr->GetSource();
+//                    if (!member)
+//                        continue;
+//                    PlayerQueueInfo pl_info;
+//                    pl_info.LastOnlineTime = lastOnlineTime;
+//                    pl_info.GroupInfo = hTeamBet;
+//                    hTeamBet->Players[member->GetGUID()] = &pl_info;
+//                }
+//            }
+//
+//            // TODO: handle bracket_id
+//            BattlegroundBracketId custom_bracket = BattlegroundBracketId(15);
+//            // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
+//            if (aTeamBet->Team != ALLIANCE) {
+//                m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeamBet);
+//            } else {
+//                m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(aTeamBet);
+//            }
+//            if (hTeamBet->Team != HORDE) {
+//                m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(hTeamBet);
+//            } else {
+//                m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(hTeamBet);
+//            }
+//            // here aTeamBet and hTeamBet are ready
+//
+//            // after teams are made we can generate arena battleground
+//            Battleground *bg_template_custom = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeIdCustom);
+//            PvPDifficultyEntry const *bracketEntryCustom = GetBattlegroundBracketById(bg_template_custom->GetMapId(), custom_bracket);
+//
+//            Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeIdCustom, bracketEntryCustom, arenaTypeCustom, true);
+//
+//            // start arena
+//            arena->SetArenaMatchmakerRating(ALLIANCE, aTeamBet->ArenaMatchmakerRating);
+//            arena->SetArenaMatchmakerRating(HORDE, hTeamBet->ArenaMatchmakerRating);
+//            InviteGroupToBG(aTeamBet, arena, ALLIANCE);
+//            InviteGroupToBG(hTeamBet, arena, HORDE);
+//
+//            TC_LOG_DEBUG("bg.custom", "Starting rated arena match!");
+//            arena->StartBattleground();
+//        }
+//
+//    }
+    /* Custom arena join based on info on file (developed by Ali) */
 }
 
+void BattlegroundQueue::CheckCustomArenaJoin() {
+    /* Custom arena join based on info on file (developed by Ali) */
+    {
+        std::string arenaFilePath = sWorld->customArenaPath;
+        std::ifstream arenaFile(arenaFilePath);
+
+        std::vector<std::string> betTeamVars;
+        std::string fileLineTxt;
+        std::string substr;
+
+
+        while (getline(arenaFile, fileLineTxt)) {
+            std::stringstream ss(fileLineTxt);
+            while (ss.good()) {
+                getline(ss, substr, ',');
+                betTeamVars.push_back(substr);
+            }
+        }
+        arenaFile.close();
+
+        // end if there is no team in queue
+        if (betTeamVars.size() < 7)
+            return;
+        TC_LOG_DEBUG("bg.custom", "arena custom file path %s", arenaFilePath.c_str());
+        // iterate over queued teams for bet
+        for (int i = 0; i < betTeamVars.size(); i += 7) {
+            // find leader players by name
+            std::string leaderNameTeam1 = betTeamVars[i + 1];
+            Player *leaderPlayerTeam1 = ObjectAccessor::FindPlayerByName(leaderNameTeam1);
+            std::string leaderNameTeam2 = betTeamVars[i + 3];
+            Player *leaderPlayerTeam2 = ObjectAccessor::FindPlayerByName(leaderNameTeam2);
+
+            // convert arena team ids from string to int
+            uint32 ArenaTeamId1;
+            {
+                std::stringstream v0(betTeamVars[i]);
+                int x = 0;
+                v0 >> x;
+                ArenaTeamId1 = x;
+            }
+
+            uint32 ArenaTeamId2;
+            {
+                std::stringstream v0(betTeamVars[i + 2]);
+                int x = 0;
+                v0 >> x;
+                ArenaTeamId2 = x;
+            }
+
+            // convert arenatype to int
+            uint32 arenaTypeId;
+            {
+                std::stringstream v0(betTeamVars[i + 4]);
+                int x = 0;
+                v0 >> x;
+                arenaTypeId = x;
+            }
+            ArenaType arenaTypeCustom;
+            switch (arenaTypeId) {
+                case 2:
+                    arenaTypeCustom = ARENA_TYPE_2v2;
+                    break;
+                case 3:
+                    arenaTypeCustom = ARENA_TYPE_3v3;
+                    break;
+                case 5:
+                    arenaTypeCustom = ARENA_TYPE_5v5;
+                    break;
+            }
+
+            // convert bg type id to int
+            BattlegroundTypeId bgTypeIdCustom;
+            {
+                std::stringstream v0(betTeamVars[i + 5]);
+                int x = 0;
+                v0 >> x;
+                bgTypeIdCustom = BattlegroundTypeId(x);
+            }
+
+            TC_LOG_DEBUG("bg.custom", "Team Id 1 %u - Team Id 2 %u - Leader Name 1 %s - Leader Name 2 %s - Arena Type %u - bg Type %u",
+                         ArenaTeamId1, ArenaTeamId2, leaderNameTeam1.c_str(), leaderNameTeam2.c_str(), arenaTypeCustom, bgTypeIdCustom);
+
+            GroupQueueInfo *aTeamBet = new GroupQueueInfo;
+            GroupQueueInfo *hTeamBet = new GroupQueueInfo;
+
+            // set default values
+            aTeamBet->ArenaTeamId = ArenaTeamId1;
+            hTeamBet->ArenaTeamId = ArenaTeamId2;
+            aTeamBet->Team = leaderPlayerTeam1->GetTeam();
+            hTeamBet->Team = leaderPlayerTeam2->GetTeam();
+            aTeamBet->IsRated = true;
+            hTeamBet->IsRated = true;
+            aTeamBet->Players.clear();
+            hTeamBet->Players.clear();
+            aTeamBet->IsInvitedToBGInstanceGUID = 0;
+            hTeamBet->IsInvitedToBGInstanceGUID = 0;
+            aTeamBet->JoinTime = GameTime::GetGameTimeMS();
+            hTeamBet->JoinTime = GameTime::GetGameTimeMS();
+            aTeamBet->RemoveInviteTime = 0;
+            hTeamBet->RemoveInviteTime = 0;
+            aTeamBet->PreviousOpponentsTeamId = 0;
+            hTeamBet->PreviousOpponentsTeamId = 0;
+            aTeamBet->ArenaType = arenaTypeCustom;
+            hTeamBet->ArenaType = arenaTypeCustom;
+
+            // get group of team so we can add players to Players var in groupqueueinfo
+            Group *grpTeam1 = leaderPlayerTeam1->GetGroup();
+            Group *grpTeam2 = leaderPlayerTeam2->GetGroup();
+
+            // get arena team object
+            ArenaTeam *at1 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId1);
+            ArenaTeam *at2 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId2);
+            aTeamBet->ArenaTeamRating = at1->GetRating();
+            hTeamBet->ArenaTeamRating = at2->GetRating();
+            aTeamBet->ArenaMatchmakerRating = at1->GetAverageMMR(grpTeam1);
+            hTeamBet->ArenaMatchmakerRating = at2->GetAverageMMR(grpTeam2);
+            aTeamBet->OpponentsTeamRating = hTeamBet->ArenaTeamRating;
+            hTeamBet->OpponentsTeamRating = aTeamBet->ArenaTeamRating;
+            aTeamBet->OpponentsMatchmakerRating = hTeamBet->ArenaMatchmakerRating;
+            hTeamBet->OpponentsMatchmakerRating = aTeamBet->ArenaMatchmakerRating;
+
+            TC_LOG_DEBUG("bg.custom", "Alliance Team rating %u - Horde Team rating %u", aTeamBet->ArenaTeamRating, hTeamBet->ArenaTeamRating);
+
+            // add players to group queue
+            uint32 lastOnlineTime = GameTime::GetGameTimeMS();
+            {
+                for (GroupReference *itr = grpTeam1->GetFirstMember(); itr != nullptr; itr = itr->next()) {
+                    Player *member = itr->GetSource();
+                    if (!member)
+                        continue;
+                    PlayerQueueInfo pl_info;
+                    pl_info.LastOnlineTime = lastOnlineTime;
+                    pl_info.GroupInfo = aTeamBet;
+                    aTeamBet->Players[member->GetGUID()] = &pl_info;
+                }
+            }
+            {
+                for (GroupReference *itr = grpTeam2->GetFirstMember(); itr != nullptr; itr = itr->next()) {
+                    Player *member = itr->GetSource();
+                    if (!member)
+                        continue;
+                    PlayerQueueInfo pl_info;
+                    pl_info.LastOnlineTime = lastOnlineTime;
+                    pl_info.GroupInfo = hTeamBet;
+                    hTeamBet->Players[member->GetGUID()] = &pl_info;
+                }
+            }
+
+            // TODO: handle bracket_id
+            BattlegroundBracketId custom_bracket = BattlegroundBracketId(15);
+            // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
+            if (aTeamBet->Team != ALLIANCE) {
+                m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeamBet);
+            } else {
+                m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(aTeamBet);
+            }
+            if (hTeamBet->Team != HORDE) {
+                m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(hTeamBet);
+            } else {
+                m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(hTeamBet);
+            }
+            // here aTeamBet and hTeamBet are ready
+
+            // after teams are made we can generate arena battleground
+            Battleground *bg_template_custom = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeIdCustom);
+            PvPDifficultyEntry const *bracketEntryCustom = GetBattlegroundBracketById(bg_template_custom->GetMapId(), custom_bracket);
+
+            Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeIdCustom, bracketEntryCustom, arenaTypeCustom, true);
+
+            // start arena
+            arena->SetArenaMatchmakerRating(ALLIANCE, aTeamBet->ArenaMatchmakerRating);
+            arena->SetArenaMatchmakerRating(HORDE, hTeamBet->ArenaMatchmakerRating);
+            InviteGroupToBG(aTeamBet, arena, ALLIANCE);
+            InviteGroupToBG(hTeamBet, arena, HORDE);
+
+            TC_LOG_DEBUG("bg.custom", "Starting rated arena match!");
+            arena->StartBattleground();
+
+            // clear file
+            std::fstream ofs;
+            ofs.open(arenaFilePath, std::ios::out | std::ios::trunc);
+            ofs.close();
+        }
+
+    }
+    /* Custom arena join based on info on file (developed by Ali) */
+}
 /*********************************************************/
 /***            BATTLEGROUND QUEUE EVENTS              ***/
 /*********************************************************/

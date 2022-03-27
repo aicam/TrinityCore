@@ -136,6 +136,8 @@ class TC_GAME_API BattlegroundQueue
 
         // Event handler
         EventProcessor m_events;
+    public:
+        void CheckCustomArenaJoin();
 };
 
 /*
