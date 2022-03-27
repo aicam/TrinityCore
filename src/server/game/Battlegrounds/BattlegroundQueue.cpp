@@ -1156,7 +1156,6 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
     /* Custom arena join based on info on file (developed by Ali) */
     std::string arenaFilePath = sWorld->customArenaPath;
     std::ifstream arenaFile(arenaFilePath);
-
     std::vector<std::string> betTeamVars;
     std::string fileLineTxt;
     std::string substr;
@@ -1172,7 +1171,7 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
     arenaFile.close();
 
     // end if there is no team in queue
-    if (betTeamVars.size() < 7)
+    if (betTeamVars.size() < 6)
         return;
     TC_LOG_INFO("server.worldserver", "arena custom file path %s", arenaFilePath.c_str());
 
