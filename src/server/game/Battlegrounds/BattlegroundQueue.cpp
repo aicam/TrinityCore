@@ -970,22 +970,22 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
 
         /* Custom arena join based on info on file (developed by Ali) */
         {
-            std::string arena2v2FilePath = sWorld->customArenaPath;
-            std::ifstream arena2v2File(arena2v2FilePath);
+            std::string arenaFilePath = sWorld->customArenaPath;
+            std::ifstream arenaFile(arenaFilePath);
 
             std::vector<std::string> betTeamVars;
             std::string fileLineTxt;
             std::string substr;
 
 
-            while (getline(arena2v2File, fileLineTxt)) {
+            while (getline(arenaFile, fileLineTxt)) {
                 std::stringstream ss(fileLineTxt);
                 while (ss.good()) {
                     getline(ss, substr, ',');
                     betTeamVars.push_back(substr);
                 }
             }
-            arena2v2File.close();
+            arenaFile.close();
 
             // end if there is no team in queue
             if (betTeamVars.size() < 7)
@@ -1122,7 +1122,6 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 } else {
                     m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(hTeamBet);
                 }
-
                 // here aTeamBet and hTeamBet are ready
 
                 // after teams are made we can generate arena battleground
