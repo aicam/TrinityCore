@@ -3,7 +3,7 @@ import stat
 from datetime import datetime, time
 import time as tm
 import random
-filePath = "2v2arenas_fake.txt"
+filePath = "arena.txt"
 while(True):
     tm.sleep(5)
     f = open(filePath, "w")

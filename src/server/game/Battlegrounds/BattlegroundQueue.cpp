@@ -1016,7 +1016,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 }
 
                 // convert arenatype to int
-                uint8 arenaTypeId;
+                uint32 arenaTypeId;
                 {
                     std::stringstream v0(betTeamVars[i + 4]);
                     int x = 0;
@@ -1027,10 +1027,13 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 switch (arenaTypeId) {
                     case 2:
                         arenaTypeCustom = ARENA_TYPE_2v2;
+                        break;
                     case 3:
                         arenaTypeCustom = ARENA_TYPE_3v3;
+                        break;
                     case 5:
                         arenaTypeCustom = ARENA_TYPE_5v5;
+                        break;
                 }
 
                 // convert bg type id to int
@@ -1107,23 +1110,23 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 }
 
                 // TODO: handle bracket_id
+                BattlegroundBracketId custom_bracket = BattlegroundBracketId(15);
                 // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
                 if (aTeamBet->Team != ALLIANCE) {
-                    m_QueuedGroups[15][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeamBet);
+                    m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeamBet);
                 } else {
-                    m_QueuedGroups[15][BG_QUEUE_PREMADE_HORDE].push_front(aTeamBet);
+                    m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(aTeamBet);
                 }
                 if (hTeamBet->Team != HORDE) {
-                    m_QueuedGroups[15][BG_QUEUE_PREMADE_ALLIANCE].push_front(hTeamBet);
+                    m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(hTeamBet);
                 } else {
-                    m_QueuedGroups[15][BG_QUEUE_PREMADE_HORDE].push_front(hTeamBet);
+                    m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(hTeamBet);
                 }
 
                 // here aTeamBet and hTeamBet are ready
 
                 // after teams are made we can generate arena battleground
                 Battleground *bg_template_custom = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeIdCustom);
-                BattlegroundBracketId custom_bracket = BattlegroundBracketId(15);
                 PvPDifficultyEntry const *bracketEntryCustom = GetBattlegroundBracketById(bg_template_custom->GetMapId(), custom_bracket);
 
                 Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeIdCustom, bracketEntryCustom, arenaTypeCustom, true);
