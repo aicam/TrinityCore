@@ -1007,6 +1007,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                     v0 >> x;
                     ArenaTeamId1 = x;
                 }
+
                 uint32 ArenaTeamId2;
                 {
                     std::stringstream v0(betTeamVars[i + 2]);
@@ -1044,6 +1045,9 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                     v0 >> x;
                     bgTypeIdCustom = BattlegroundTypeId(x);
                 }
+
+                TC_LOG_DEBUG("bg.custom", "Team Id 1 %u - Team Id 2 %u - Leader Name 1 %s - Leader Name 2 %s - Arena Type %u - bg Type %u",
+                             ArenaTeamId1, ArenaTeamId2, leaderNameTeam1.c_str(), leaderNameTeam2.c_str(), arenaTypeCustom, bgTypeIdCustom);
 
                 GroupQueueInfo *aTeamBet = new GroupQueueInfo;
                 GroupQueueInfo *hTeamBet = new GroupQueueInfo;
@@ -1083,6 +1087,8 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 hTeamBet->OpponentsTeamRating = aTeamBet->ArenaTeamRating;
                 aTeamBet->OpponentsMatchmakerRating = hTeamBet->ArenaMatchmakerRating;
                 hTeamBet->OpponentsMatchmakerRating = aTeamBet->ArenaMatchmakerRating;
+
+                TC_LOG_DEBUG("bg.custom", "Alliance Team rating %u - Horde Team rating %u", aTeamBet->ArenaTeamRating, hTeamBet->ArenaTeamRating);
 
                 // add players to group queue
                 uint32 lastOnlineTime = GameTime::GetGameTimeMS();
@@ -1136,7 +1142,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 InviteGroupToBG(aTeamBet, arena, ALLIANCE);
                 InviteGroupToBG(hTeamBet, arena, HORDE);
 
-                TC_LOG_DEBUG("bg.battleground", "Starting rated arena match!");
+                TC_LOG_DEBUG("bg.custom", "Starting rated arena match!");
                 arena->StartBattleground();
             }
 
