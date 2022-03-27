@@ -1127,6 +1127,15 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 PvPDifficultyEntry const *bracketEntryCustom = GetBattlegroundBracketById(bg_template_custom->GetMapId(), custom_bracket);
 
                 Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeIdCustom, bracketEntryCustom, arenaTypeCustom, true);
+
+                // start arena
+                arena->SetArenaMatchmakerRating(ALLIANCE, aTeamBet->ArenaMatchmakerRating);
+                arena->SetArenaMatchmakerRating(HORDE, hTeamBet->ArenaMatchmakerRating);
+                InviteGroupToBG(aTeamBet, arena, ALLIANCE);
+                InviteGroupToBG(hTeamBet, arena, HORDE);
+
+                TC_LOG_DEBUG("bg.battleground", "Starting rated arena match!");
+                arena->StartBattleground();
             }
 
         }
