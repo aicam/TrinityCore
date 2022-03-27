@@ -1337,7 +1337,7 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         InviteGroupToBG(aTeamBet, arena, ALLIANCE);
         InviteGroupToBG(hTeamBet, arena, HORDE);
 
-        TC_LOG_DEBUG("bg.custom", "Starting rated arena match!");
+        TC_LOG_INFO("server.worldserver", "Starting rated arena match!");
         arena->StartBattleground();
 
     }
