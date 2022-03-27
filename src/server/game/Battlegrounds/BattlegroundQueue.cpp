@@ -1108,7 +1108,7 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 Player *member = itr->GetSource();
                 if (!member)
                     continue;
-                PlayerQueueInfo pl_info;
+                PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
                 pl_info.LastOnlineTime = lastOnlineTime;
                 pl_info.GroupInfo = aTeamBet;
                 aTeamBet->Players[member->GetGUID()] = &pl_info;
@@ -1119,7 +1119,7 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 Player *member = itr->GetSource();
                 if (!member)
                     continue;
-                PlayerQueueInfo pl_info;
+                PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
                 pl_info.LastOnlineTime = lastOnlineTime;
                 pl_info.GroupInfo = hTeamBet;
                 hTeamBet->Players[member->GetGUID()] = &pl_info;
