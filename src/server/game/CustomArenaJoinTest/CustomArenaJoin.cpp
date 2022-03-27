@@ -32,13 +32,13 @@ int main() {
         cout << "leaderNameTeam2 " << v[i + 3] << endl;
         cout << "BattlegroundTypeId " << v[i + 4] << endl;
     }
-//    uint32 ArenaTeamId;
-//    {
-//        stringstream v0(v[5]);
-//        int x = 0;
-//        v0 >> x;
-//        ArenaTeamId = x;
-//    }
+    uint32 ArenaTeamId;
+    {
+        stringstream v0(v[5]);
+        int x = 0;
+        v0 >> x;
+        ArenaTeamId = x;
+    }
 //    if (ArenaTeamId != 1234) {
 //        cout << ArenaTeamId << "\n" << "error";
 //    }

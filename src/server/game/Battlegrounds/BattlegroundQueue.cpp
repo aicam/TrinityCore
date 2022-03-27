@@ -1040,10 +1040,30 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 std::string leaderNameTeam2 = betTeamVars[i + 3];
                 Player *leaderPlayerTeam2 = ObjectAccessor::FindPlayerByName(leaderNameTeam2);
 
+                // convert arena team ids from string to int
+                uint32 ArenaTeamId1;
+                {
+                    std::stringstream v0(betTeamVars[i]);
+                    int x = 0;
+                    v0 >> x;
+                    ArenaTeamId1 = x;
+                }
+                uint32 ArenaTeamId2;
+                {
+                    std::stringstream v0(betTeamVars[i + 2]);
+                    int x = 0;
+                    v0 >> x;
+                    ArenaTeamId1 = x;
+                }
+
                 GroupQueueInfo *aTeam;
                 GroupQueueInfo *hTeam;
 
                 // set default values
+                aTeam->ArenaTeamId = ArenaTeamId1;
+                hTeam->ArenaTeamId = ArenaTeamId2;
+                aTeam->Team = leaderPlayerTeam1->GetTeam();
+                hTeam->Team = leaderPlayerTeam2->GetTeam();
                 aTeam->IsRated = true;
                 hTeam->IsRated = true;
                 aTeam->Players.clear();
@@ -1054,12 +1074,22 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 hTeam->JoinTime = GameTime::GetGameTimeMS();
                 aTeam->RemoveInviteTime = 0;
                 hTeam->RemoveInviteTime = 0;
-                aTeam->Team = leaderPlayerTeam1->GetTeam();
-                hTeam->Team = leaderPlayerTeam2->GetTeam();
+
 
                 // get group of team so we can add players to Players var in groupqueueinfo
                 Group *grpTeam1 = leaderPlayerTeam1->GetGroup();
                 Group *grpTeam2 = leaderPlayerTeam2->GetGroup();
+
+                // get arena team object
+                ArenaTeam* at1 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId1);
+                ArenaTeam* at2 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId2);
+                aTeam->ArenaTeamRating = at1->GetRating();
+                hTeam->ArenaTeamRating = at2->GetRating();
+                aTeam->ArenaMatchmakerRating = at1->GetAverageMMR(grpTeam1);
+                hTeam->ArenaMatchmakerRating = at2->GetAverageMMR(grpTeam2);
+
+                // previous opponent
+
             }
 
         }
