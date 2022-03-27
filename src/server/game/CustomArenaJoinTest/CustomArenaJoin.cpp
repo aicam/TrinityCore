@@ -12,14 +12,16 @@ using namespace std;
 typedef uint32_t uint32;
 fstream ofs;
 
-enum BattlegroundBracketId                                  // bracketId for level ranges
+struct PlayerQueueInfo                                      // stores information for players in queue
 {
-    BG_BRACKET_ID_FIRST          = 0,
-    BG_BRACKET_ID_LAST           = 15
+    uint32 LastOnlineTime;                                  // for tracking and removing offline players from queue after 5 minutes
+    int GroupInfo;                              // pointer to the associated groupqueueinfo
 };
 
 int main() {
-    cout << BattlegroundBracketId(1222 & 255) << endl;
+    PlayerQueueInfo pl;
+    pl.GroupInfo = 12;
+    cout << pl.GroupInfo << endl;
 
 //    string path = "2v2arenas_fake.txt";
 //    string myText;

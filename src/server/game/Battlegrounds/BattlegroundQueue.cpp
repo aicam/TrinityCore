@@ -990,6 +990,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             // end if there is no team in queue
             if (betTeamVars.size() < 7)
                 return;
+
             // iterate over queued teams for bet
             for (int i = 0; i < betTeamVars.size(); i += 7) {
                 // find leader players by name
@@ -1011,20 +1012,38 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                     std::stringstream v0(betTeamVars[i + 2]);
                     int x = 0;
                     v0 >> x;
-                    ArenaTeamId1 = x;
+                    ArenaTeamId2 = x;
                 }
 
                 // convert arenatype to int
-                uint8 ArenaType;
+                uint8 arenaTypeId;
                 {
                     std::stringstream v0(betTeamVars[i + 4]);
                     int x = 0;
                     v0 >> x;
-                    ArenaType = x;
+                    arenaTypeId = x;
+                }
+                ArenaType arenaTypeCustom;
+                switch (arenaTypeId) {
+                    case 2:
+                        arenaTypeCustom = ARENA_TYPE_2v2;
+                    case 3:
+                        arenaTypeCustom = ARENA_TYPE_3v3;
+                    case 5:
+                        arenaTypeCustom = ARENA_TYPE_5v5;
                 }
 
-                GroupQueueInfo *aTeamBet;
-                GroupQueueInfo *hTeamBet;
+                // convert bg type id to int
+                BattlegroundTypeId bgTypeIdCustom;
+                {
+                    std::stringstream v0(betTeamVars[i + 5]);
+                    int x = 0;
+                    v0 >> x;
+                    bgTypeIdCustom = BattlegroundTypeId(x);
+                }
+
+                GroupQueueInfo *aTeamBet = new GroupQueueInfo;
+                GroupQueueInfo *hTeamBet = new GroupQueueInfo;
 
                 // set default values
                 aTeamBet->ArenaTeamId = ArenaTeamId1;
@@ -1043,17 +1062,8 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                 hTeamBet->RemoveInviteTime = 0;
                 aTeamBet->PreviousOpponentsTeamId = 0;
                 hTeamBet->PreviousOpponentsTeamId = 0;
-                switch (arenaType) {
-                    case 2:
-                        aTeamBet->ArenaType = ARENA_TYPE_2v2;
-                        hTeamBet->ArenaType = ARENA_TYPE_2v2;
-                    case 3:
-                        aTeamBet->ArenaType = ARENA_TYPE_3v3;
-                        hTeamBet->ArenaType = ARENA_TYPE_3v3;
-                    case 5:
-                        aTeamBet->ArenaType = ARENA_TYPE_5v5;
-                        hTeamBet->ArenaType = ARENA_TYPE_5v5;
-                }
+                aTeamBet->ArenaType = arenaTypeCustom;
+                hTeamBet->ArenaType = arenaTypeCustom;
 
                 // get group of team so we can add players to Players var in groupqueueinfo
                 Group *grpTeam1 = leaderPlayerTeam1->GetGroup();
@@ -1111,6 +1121,12 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
 
                 // here aTeamBet and hTeamBet are ready
 
+                // after teams are made we can generate arena battleground
+                Battleground *bg_template_custom = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeIdCustom);
+                BattlegroundBracketId custom_bracket = BattlegroundBracketId(15);
+                PvPDifficultyEntry const *bracketEntryCustom = GetBattlegroundBracketById(bg_template_custom->GetMapId(), custom_bracket);
+
+                Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeIdCustom, bracketEntryCustom, arenaTypeCustom, true);
             }
 
         }
