@@ -768,6 +768,8 @@ class TC_GAME_API World
         void TriggerGuidAlert();
         bool IsGuidWarning() { return _guidWarn; }
         bool IsGuidAlert() { return _guidAlert; }
+        // custom arena
+        std::string customArenaPath;
 
     protected:
         void _UpdateGameTime();
@@ -872,7 +874,6 @@ class TC_GAME_API World
         void DoGuidWarningRestart();
         void DoGuidAlertRestart();
         QueryCallbackProcessor _queryProcessor;
-
         std::string _guidWarningMsg;
         std::string _alertRestartReason;
 

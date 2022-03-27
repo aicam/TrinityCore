@@ -29,7 +29,6 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "World.h"
-#include "Config.h"
 
 /*********************************************************/
 /***            BATTLEGROUND QUEUE SYSTEM              ***/
@@ -971,7 +970,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
 
         /* Custom arena join based on info on file (developed by Ali) */
         {
-            std::string arena2v2FilePath = sConfigMgr->GetStringDefault("CustomArena.2v2.Path", "arena2v2.txt");
+            std::string arena2v2FilePath = sWorld->customArenaPath;
             std::ifstream arena2v2File(arena2v2FilePath);
 
             std::vector<std::string> betTeamVars;
@@ -1097,9 +1096,17 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                     }
                 }
 
+                // TODO: handle bracket_id
                 // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
                 if (aTeamBet->Team != ALLIANCE) {
-                    m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeamBet);
+                    m_QueuedGroups[15][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeamBet);
+                } else {
+                    m_QueuedGroups[15][BG_QUEUE_PREMADE_HORDE].push_front(aTeamBet);
+                }
+                if (hTeamBet->Team != HORDE) {
+                    m_QueuedGroups[15][BG_QUEUE_PREMADE_ALLIANCE].push_front(hTeamBet);
+                } else {
+                    m_QueuedGroups[15][BG_QUEUE_PREMADE_HORDE].push_front(hTeamBet);
                 }
 
                 // here aTeamBet and hTeamBet are ready

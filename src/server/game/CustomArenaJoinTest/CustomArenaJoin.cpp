@@ -12,33 +12,43 @@ using namespace std;
 typedef uint32_t uint32;
 fstream ofs;
 
-int main() {
-    string path = "2v2arenas_fake.txt";
-    string myText;
-    ifstream are2v2File(path);
-    vector <string> v;
-    while (getline(are2v2File, myText)) {
-        stringstream ss(myText);
+enum BattlegroundBracketId                                  // bracketId for level ranges
+{
+    BG_BRACKET_ID_FIRST          = 0,
+    BG_BRACKET_ID_LAST           = 15
+};
 
-        while (ss.good()) {
-            string substr;
-            getline(ss, substr, ',');
-            v.push_back(substr);
-        }
-    }
-    are2v2File.close();
-    for (int i = 0; i < v.size(); i += 6) {
-        cout << "leaderNameTeam1 " << v[i + 1] << endl;
-        cout << "leaderNameTeam2 " << v[i + 3] << endl;
-        cout << "BattlegroundTypeId " << v[i + 4] << endl;
-    }
-    uint32 ArenaTeamId;
-    {
-        stringstream v0(v[5]);
-        int x = 0;
-        v0 >> x;
-        ArenaTeamId = x;
-    }
+int main() {
+    cout << BattlegroundBracketId(1222 & 255) << endl;
+
+//    string path = "2v2arenas_fake.txt";
+//    string myText;
+//    ifstream are2v2File(path);
+//    vector <string> v;
+//    while (getline(are2v2File, myText)) {
+//        stringstream ss(myText);
+//
+//        while (ss.good()) {
+//            string substr;
+//            getline(ss, substr, ',');
+//            v.push_back(substr);
+//        }
+//    }
+//    are2v2File.close();
+//    for (int i = 0; i < v.size(); i += 6) {
+//        cout << "leaderNameTeam1 " << v[i + 1] << endl;
+//        cout << "leaderNameTeam2 " << v[i + 3] << endl;
+//        cout << "BattlegroundTypeId " << v[i + 4] << endl;
+//    }
+//    uint32 ArenaTeamId;
+//    {
+//        stringstream v0(v[5]);
+//        int x = 0;
+//        v0 >> x;
+//        ArenaTeamId = x;
+//    }
+
+
 //    if (ArenaTeamId != 1234) {
 //        cout << ArenaTeamId << "\n" << "error";
 //    }
