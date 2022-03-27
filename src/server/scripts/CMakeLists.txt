@@ -159,8 +159,7 @@ foreach(SCRIPT_MODULE ${SCRIPT_MODULE_LIST})
     list(APPEND DYNAMIC_SCRIPT_MODULE_PROJECTS ${SCRIPT_MODULE_PROJECT_NAME})
     # Create the script module project
     add_library(${SCRIPT_MODULE_PROJECT_NAME} SHARED
-      ${SCRIPT_MODULE_PRIVATE_SOURCES}
-      ${SCRIPT_MODULE_PRIVATE_SCRIPTLOADER} ../game/CustomArenaJoinTest/CustomArenaJoin.cpp)
+      ${SCRIPT_MODULE_PRIVATE_SOURCES})
     target_link_libraries(${SCRIPT_MODULE_PROJECT_NAME}
       PRIVATE
         trinity-core-interface
