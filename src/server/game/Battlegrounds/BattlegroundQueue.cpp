@@ -1032,32 +1032,32 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
             v0 >> x;
             arenaTypeId = x;
         }
-        ArenaType arenaTypeCustom;
+        ArenaType arenatype;
         switch (arenaTypeId) {
             case 2:
-                arenaTypeCustom = ARENA_TYPE_2v2;
+                arenatype = ARENA_TYPE_2v2;
                 break;
             case 3:
-                arenaTypeCustom = ARENA_TYPE_3v3;
+                arenatype = ARENA_TYPE_3v3;
                 break;
             case 5:
-                arenaTypeCustom = ARENA_TYPE_5v5;
+                arenatype = ARENA_TYPE_5v5;
                 break;
         }
 
         // convert bg type id to int
-        BattlegroundTypeId bgTypeIdCustom;
+        BattlegroundTypeId bgTypeId;
         {
             std::stringstream v0(betTeamVars[i + 5]);
             int x = 0;
             v0 >> x;
-            bgTypeIdCustom = BattlegroundTypeId(x);
+            bgTypeId = BattlegroundTypeId(x);
         }
 
         TC_LOG_INFO("server.worldserver",
-                     "Team Id 1 %u - Team Id 2 %u - Leader Name 1 %s - Leader Name 2 %s - Arena Type %u - bg Type %u",
-                     ArenaTeamId1, ArenaTeamId2, leaderNameTeam1.c_str(), leaderNameTeam2.c_str(), arenaTypeCustom,
-                     bgTypeIdCustom);
+                    "Team Id 1 %u - Team Id 2 %u - Leader Name 1 %s - Leader Name 2 %s - Arena Type %u - bg Type %u",
+                    ArenaTeamId1, ArenaTeamId2, leaderNameTeam1.c_str(), leaderNameTeam2.c_str(), arenatype,
+                    bgTypeId);
 
         GroupQueueInfo *aTeamBet = new GroupQueueInfo;
         GroupQueueInfo *hTeamBet = new GroupQueueInfo;
@@ -1077,10 +1077,8 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         hTeamBet->JoinTime = GameTime::GetGameTimeMS();
         aTeamBet->RemoveInviteTime = 0;
         hTeamBet->RemoveInviteTime = 0;
-        aTeamBet->PreviousOpponentsTeamId = 0;
-        hTeamBet->PreviousOpponentsTeamId = 0;
-        aTeamBet->ArenaType = arenaTypeCustom;
-        hTeamBet->ArenaType = arenaTypeCustom;
+        aTeamBet->ArenaType = arenatype;
+        hTeamBet->ArenaType = arenatype;
 
         // get group of team so we can add players to Players var in groupqueueinfo
         Group *grpTeam1 = leaderPlayerTeam1->GetGroup();
@@ -1097,17 +1095,41 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         hTeamBet->OpponentsTeamRating = aTeamBet->ArenaTeamRating;
         aTeamBet->OpponentsMatchmakerRating = hTeamBet->ArenaMatchmakerRating;
         hTeamBet->OpponentsMatchmakerRating = aTeamBet->ArenaMatchmakerRating;
+        aTeamBet->PreviousOpponentsTeamId = at1->GetPreviousOpponents();
+        hTeamBet->PreviousOpponentsTeamId = at2->GetPreviousOpponents();
 
         TC_LOG_INFO("server.worldserver", "Alliance Team rating %u - Horde Team rating %u", aTeamBet->ArenaTeamRating,
                      hTeamBet->ArenaTeamRating);
 
         // add players to group queue
+        Battleground *bg = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
+        BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenatype);
+        BattlegroundQueue &bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
+        bg->SetRated(true);
+
+        PvPDifficultyEntry const *bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), leaderPlayerTeam1->GetLevel());
+        BattlegroundBracketId custom_bracket = bracketEntry->GetBracketId();
+
+        // join groups utils
+        GroupJoinBattlegroundResult err = ERR_GROUP_JOIN_BATTLEGROUND_FAIL;
+        err = GroupJoinBattlegroundResult(bg->GetTypeID());
         uint32 lastOnlineTime = GameTime::GetGameTimeMS();
+
         {
             for (GroupReference *itr = grpTeam1->GetFirstMember(); itr != nullptr; itr = itr->next()) {
                 Player *member = itr->GetSource();
                 if (!member)
                     continue;
+
+                // send packet data to player
+                WorldPacket data;
+                uint32 queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId);
+                // send status packet (in queue)
+                sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, 20, 0, arenatype, 0);
+                member->SendDirectMessage(&data);
+                sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
+                member->SendDirectMessage(&data);
+
                 PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
                 pl_info.LastOnlineTime = lastOnlineTime;
                 pl_info.GroupInfo = aTeamBet;
@@ -1119,6 +1141,16 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 Player *member = itr->GetSource();
                 if (!member)
                     continue;
+
+                // send packet data to player
+                WorldPacket data;
+                uint32 queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId);
+                // send status packet (in queue)
+                sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, 20, 0, arenatype, 0);
+                member->SendDirectMessage(&data);
+                sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
+                member->SendDirectMessage(&data);
+
                 PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
                 pl_info.LastOnlineTime = lastOnlineTime;
                 pl_info.GroupInfo = hTeamBet;
@@ -1126,10 +1158,6 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
             }
         }
 
-        // TODO: handle bracket_id
-        Battleground *bg_template_custom = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeIdCustom);
-        PvPDifficultyEntry const *bracketEntryCustom = GetBattlegroundBracketByLevel(bg_template_custom->GetMapId(), leaderPlayerTeam1->GetLevel());
-        BattlegroundBracketId custom_bracket = bracketEntryCustom->GetBracketId();
         // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
         if (aTeamBet->Team != ALLIANCE) {
             m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeamBet);
@@ -1144,8 +1172,8 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         // here aTeamBet and hTeamBet are ready
 
         // after teams are made we can generate arena battleground
-        Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeIdCustom, bracketEntryCustom,
-                                                                      arenaTypeCustom, true);
+        Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry,
+                                                                      arenatype, true);
 
         // start arena
         arena->SetArenaMatchmakerRating(ALLIANCE, aTeamBet->ArenaMatchmakerRating);

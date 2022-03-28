@@ -608,6 +608,7 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recvData*/)
     }
 }
 
+// custom arena help!!
 void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_BATTLEMASTER_JOIN_ARENA");
