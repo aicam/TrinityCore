@@ -1111,8 +1111,7 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         BattlegroundBracketId custom_bracket = bracketEntry->GetBracketId();
 
         // join groups utils
-        GroupJoinBattlegroundResult err = ERR_GROUP_JOIN_BATTLEGROUND_FAIL;
-        err = GroupJoinBattlegroundResult(bg->GetTypeID());
+        GroupJoinBattlegroundResult err = GroupJoinBattlegroundResult(bg->GetTypeID());
         uint32 lastOnlineTime = GameTime::GetGameTimeMS();
 
         {
@@ -1170,7 +1169,8 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
             m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(hTeamBet);
         }
         // here aTeamBet and hTeamBet are ready
-
+//        sBattlegroundMgr->ScheduleQueueUpdate(aTeamBet->ArenaMatchmakerRating, arenatype, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
+//        sBattlegroundMgr->ScheduleQueueUpdate(hTeamBet->ArenaMatchmakerRating, arenatype, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
         // after teams are made we can generate arena battleground
         Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry,
                                                                       arenatype, true);
