@@ -1143,11 +1143,6 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 member->SendDirectMessage(&data);
                 sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
                 member->SendDirectMessage(&data);
-
-                PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
-                pl_info.LastOnlineTime = lastOnlineTime;
-                pl_info.GroupInfo = aTeam;
-                aTeam->Players[member->GetGUID()] = &pl_info;
             }
         }
 
@@ -1168,11 +1163,6 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 member->SendDirectMessage(&data);
                 sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
                 member->SendDirectMessage(&data);
-
-                PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
-                pl_info.LastOnlineTime = lastOnlineTime;
-                pl_info.GroupInfo = hTeam;
-                hTeam->Players[member->GetGUID()] = &pl_info;
             }
         }
 
