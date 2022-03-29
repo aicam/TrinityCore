@@ -1173,10 +1173,31 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         GroupsQueueType::iterator itr_teams[PVP_TEAMS_COUNT];
         TC_LOG_INFO("server.worldserver", "Passed itr_teams definition");
         uint8 found = 0;
-        itr_teams[found++] = aTeam;
-        TC_LOG_INFO("server.worldserver", "Passed itr_teams0 assignment");
-        itr_teams[found++] = hTeam;
-        TC_LOG_INFO("server.worldserver", "Passed itr_teams1 assignment");
+        uint8 team = 0;
+        for (uint8 i = BG_QUEUE_PREMADE_ALLIANCE; i < BG_QUEUE_NORMAL_ALLIANCE; i++) {
+            // take the group that joined first
+            GroupsQueueType::iterator itr2 = m_QueuedGroups[bracket_id][i].begin();
+            for (; itr2 != m_QueuedGroups[bracket_id][i].end(); ++itr2) {
+                // if group match conditions, then add it to pool
+                if ((*itr2)->ArenaTeamId == ArenaTeamId1) {
+                    itr_teams[found++] = itr2;
+                    team = i;
+                    break;
+                }
+            }
+        }
+
+        {
+            for (GroupsQueueType::iterator itr3 = itr_teams[0];
+                 itr3 != m_QueuedGroups[bracket_id][team].end(); ++itr3) {
+                if ((*itr3)->ArenaTeamId == ArenaTeamId2) {
+                    itr_teams[found++] = itr3;
+                    break;
+                }
+            }
+        }
+
+        TC_LOG_INFO("server.worldserver", "Passed itr_teams assignment");
         // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
         if (aTeam->Team != ALLIANCE) {
             m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeam);
