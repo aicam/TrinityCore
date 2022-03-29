@@ -1169,11 +1169,14 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 member->SendDirectMessage(&data);
             }
         }
-
+        TC_LOG_INFO("server.worldserver", "Passed hTeam group");
         GroupsQueueType::iterator itr_teams[PVP_TEAMS_COUNT];
+        TC_LOG_INFO("server.worldserver", "Passed itr_teams definition");
         uint8 found = 0;
-        *itr_teams[found++] = aTeam;
-        *itr_teams[found++] = hTeam;
+        itr_teams[found++] = aTeam;
+        TC_LOG_INFO("server.worldserver", "Passed itr_teams0 assignment");
+        itr_teams[found++] = hTeam;
+        TC_LOG_INFO("server.worldserver", "Passed itr_teams1 assignment");
         // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
         if (aTeam->Team != ALLIANCE) {
             m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeam);
