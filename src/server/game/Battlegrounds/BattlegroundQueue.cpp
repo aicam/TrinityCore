@@ -1058,28 +1058,26 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                     "Team Id 1 %u - Team Id 2 %u - Leader Name 1 %s - Leader Name 2 %s - Arena Type %u - bg Type %u",
                     ArenaTeamId1, ArenaTeamId2, leaderNameTeam1.c_str(), leaderNameTeam2.c_str(), arenatype,
                     bgTypeId);
-
-
-        GroupQueueInfo *hTeamBet = new GroupQueueInfo;
+    /*
 
         // set default values
-//        aTeamBet->ArenaTeamId = ArenaTeamId1;
-//        hTeamBet->ArenaTeamId = ArenaTeamId2;
-//        aTeamBet->Team = leaderPlayerTeam1->GetTeam();
-//        hTeamBet->Team = leaderPlayerTeam2->GetTeam();
-//        aTeamBet->IsRated = true;
-//        hTeamBet->IsRated = true;
-//        aTeamBet->Players.clear();
-//        hTeamBet->Players.clear();
-//        aTeamBet->IsInvitedToBGInstanceGUID = 0;
-//        hTeamBet->IsInvitedToBGInstanceGUID = 0;
-//        aTeamBet->JoinTime = GameTime::GetGameTimeMS();
-//        hTeamBet->JoinTime = GameTime::GetGameTimeMS();
-//        aTeamBet->RemoveInviteTime = 0;
-//        hTeamBet->RemoveInviteTime = 0;
-//        aTeamBet->ArenaType = arenatype;
-//        hTeamBet->ArenaType = arenatype;
-
+//        aTeam->ArenaTeamId = ArenaTeamId1;
+//        hTeam->ArenaTeamId = ArenaTeamId2;
+//        aTeam->Team = leaderPlayerTeam1->GetTeam();
+//        hTeam->Team = leaderPlayerTeam2->GetTeam();
+//        aTeam->IsRated = true;
+//        hTeam->IsRated = true;
+//        aTeam->Players.clear();
+//        hTeam->Players.clear();
+//        aTeam->IsInvitedToBGInstanceGUID = 0;
+//        hTeam->IsInvitedToBGInstanceGUID = 0;
+//        aTeam->JoinTime = GameTime::GetGameTimeMS();
+//        hTeam->JoinTime = GameTime::GetGameTimeMS();
+//        aTeam->RemoveInviteTime = 0;
+//        hTeam->RemoveInviteTime = 0;
+//        aTeam->ArenaType = arenatype;
+//        hTeam->ArenaType = arenatype;
+*/
         // get group of team so we can add players to Players var in groupqueueinfo
         Group *grpTeam1 = leaderPlayerTeam1->GetGroup();
         Group *grpTeam2 = leaderPlayerTeam2->GetGroup();
@@ -1087,21 +1085,21 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         // get arena team object
         ArenaTeam *at1 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId1);
         ArenaTeam *at2 = sArenaTeamMgr->GetArenaTeamById(ArenaTeamId2);
+/*
+//        aTeam->ArenaTeamRating = at1->GetRating();
+//        hTeam->ArenaTeamRating = at2->GetRating();
+//        aTeam->ArenaMatchmakerRating = at1->GetAverageMMR(grpTeam1);
+//        hTeam->ArenaMatchmakerRating = at2->GetAverageMMR(grpTeam2);
+//        aTeam->OpponentsTeamRating = hTeam->ArenaTeamRating;
+//        hTeam->OpponentsTeamRating = aTeam->ArenaTeamRating;
+//        aTeam->OpponentsMatchmakerRating = hTeam->ArenaMatchmakerRating;
+//        hTeam->OpponentsMatchmakerRating = aTeam->ArenaMatchmakerRating;
+//        aTeam->PreviousOpponentsTeamId = at1->GetPreviousOpponents();
+//        hTeam->PreviousOpponentsTeamId = at2->GetPreviousOpponents();
 
-//        aTeamBet->ArenaTeamRating = at1->GetRating();
-//        hTeamBet->ArenaTeamRating = at2->GetRating();
-//        aTeamBet->ArenaMatchmakerRating = at1->GetAverageMMR(grpTeam1);
-//        hTeamBet->ArenaMatchmakerRating = at2->GetAverageMMR(grpTeam2);
-//        aTeamBet->OpponentsTeamRating = hTeamBet->ArenaTeamRating;
-//        hTeamBet->OpponentsTeamRating = aTeamBet->ArenaTeamRating;
-//        aTeamBet->OpponentsMatchmakerRating = hTeamBet->ArenaMatchmakerRating;
-//        hTeamBet->OpponentsMatchmakerRating = aTeamBet->ArenaMatchmakerRating;
-//        aTeamBet->PreviousOpponentsTeamId = at1->GetPreviousOpponents();
-//        hTeamBet->PreviousOpponentsTeamId = at2->GetPreviousOpponents();
-
-//        TC_LOG_INFO("server.worldserver", "Alliance Team rating %u - Horde Team rating %u", aTeamBet->ArenaTeamRating,
-//                     hTeamBet->ArenaTeamRating);
-
+//        TC_LOG_INFO("server.worldserver", "Alliance Team rating %u - Horde Team rating %u", aTeam->ArenaTeamRating,
+//                     hTeam->ArenaTeamRating);
+*/
         // add players to group queue
         Battleground *bg = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
         BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenatype);
@@ -1109,54 +1107,12 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         bg->SetRated(true);
 
         PvPDifficultyEntry const *bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), leaderPlayerTeam1->GetLevel());
-        BattlegroundBracketId custom_bracket = bracketEntry->GetBracketId();
+        BattlegroundBracketId bracket_id = bracketEntry->GetBracketId();
 
         // join groups utils
         GroupJoinBattlegroundResult err = GroupJoinBattlegroundResult(bg->GetTypeID());
         uint32 lastOnlineTime = GameTime::GetGameTimeMS();
 
-//        {
-//            for (GroupReference *itr = grpTeam1->GetFirstMember(); itr != nullptr; itr = itr->next()) {
-//                Player *member = itr->GetSource();
-//                if (!member)
-//                    continue;
-//
-//                // send packet data to player
-//                WorldPacket data;
-//                uint32 queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId);
-//                // send status packet (in queue)
-//                sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, 20, 0, arenatype, 0);
-//                member->SendDirectMessage(&data);
-//                sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
-//                member->SendDirectMessage(&data);
-//
-//                PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
-//                pl_info.LastOnlineTime = lastOnlineTime;
-//                pl_info.GroupInfo = aTeamBet;
-//                aTeamBet->Players[member->GetGUID()] = &pl_info;
-//            }
-//        }
-//        {
-//            for (GroupReference *itr = grpTeam2->GetFirstMember(); itr != nullptr; itr = itr->next()) {
-//                Player *member = itr->GetSource();
-//                if (!member)
-//                    continue;
-//
-//                // send packet data to player
-//                WorldPacket data;
-//                uint32 queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId);
-//                // send status packet (in queue)
-//                sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, 20, 0, arenatype, 0);
-//                member->SendDirectMessage(&data);
-//                sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
-//                member->SendDirectMessage(&data);
-//
-//                PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
-//                pl_info.LastOnlineTime = lastOnlineTime;
-//                pl_info.GroupInfo = hTeamBet;
-//                hTeamBet->Players[member->GetGUID()] = &pl_info;
-//            }
-//        }
         uint8 arenaslot;
         switch (arenatype) {
             case ARENA_TYPE_2v2:
@@ -1170,33 +1126,89 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 break;
         }
         uint32 aTeamid1 = leaderPlayerTeam1->GetArenaTeamId(arenaslot);
-        GroupQueueInfo *aTeamBet = bgQueue.AddGroup(leaderPlayerTeam1, grpTeam1, bgTypeId, bracketEntry, arenatype, true, false, at1->GetRating(), at1->GetAverageMMR(grpTeam1), aTeamid1, at1->GetPreviousOpponents());
+        uint32 aTeamid2 = leaderPlayerTeam2->GetArenaTeamId(arenaslot);
+        GroupQueueInfo *aTeam = bgQueue.AddGroup(leaderPlayerTeam1, grpTeam1, bgTypeId, bracketEntry, arenatype, true, false, at1->GetRating(), at1->GetAverageMMR(grpTeam1), aTeamid1, at1->GetPreviousOpponents());
 
+        {
+            for (GroupReference *itr = grpTeam1->GetFirstMember(); itr != nullptr; itr = itr->next()) {
+                Player *member = itr->GetSource();
+                if (!member)
+                    continue;
+
+                // send packet data to player
+                WorldPacket data;
+                uint32 queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId);
+                // send status packet (in queue)
+                sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, 20, 0, arenatype, 0);
+                member->SendDirectMessage(&data);
+                sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
+                member->SendDirectMessage(&data);
+
+                PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
+                pl_info.LastOnlineTime = lastOnlineTime;
+                pl_info.GroupInfo = aTeam;
+                aTeam->Players[member->GetGUID()] = &pl_info;
+            }
+        }
+
+        GroupQueueInfo *hTeam = bgQueue.AddGroup(leaderPlayerTeam2, grpTeam2, bgTypeId, bracketEntry, arenatype, true, false, at2->GetRating(), at2->GetAverageMMR(grpTeam2), aTeamid2, at2->GetPreviousOpponents());
+
+        {
+            for (GroupReference *itr = grpTeam2->GetFirstMember(); itr != nullptr; itr = itr->next()) {
+                Player *member = itr->GetSource();
+                if (!member)
+                    continue;
+
+                // send packet data to player
+                WorldPacket data;
+                uint32 queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId);
+                // send status packet (in queue)
+                sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, 20, 0,
+                                                                arenatype, 0);
+                member->SendDirectMessage(&data);
+                sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
+                member->SendDirectMessage(&data);
+
+                PlayerQueueInfo &pl_info = m_QueuedPlayers[member->GetGUID()];
+                pl_info.LastOnlineTime = lastOnlineTime;
+                pl_info.GroupInfo = hTeam;
+                hTeam->Players[member->GetGUID()] = &pl_info;
+            }
+        }
+
+        GroupsQueueType::iterator itr_teams[PVP_TEAMS_COUNT];
+        uint8 found = 0;
+        *itr_teams[found++] = aTeam;
+        *itr_teams[found++] = hTeam;
         // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
-        if (aTeamBet->Team != ALLIANCE) {
-            m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeamBet);
-        } else {
-            m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(aTeamBet);
+        if (aTeam->Team != ALLIANCE) {
+            m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeam);
+            m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].erase(itr_teams[TEAM_ALLIANCE]);
         }
-        if (hTeamBet->Team != HORDE) {
-            m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_ALLIANCE].push_front(hTeamBet);
-        } else {
-            m_QueuedGroups[custom_bracket][BG_QUEUE_PREMADE_HORDE].push_front(hTeamBet);
+        if (hTeam->Team != HORDE) {
+            m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].push_front(hTeam);
+            m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].erase(itr_teams[TEAM_HORDE]);
         }
-        // here aTeamBet and hTeamBet are ready
-//        sBattlegroundMgr->ScheduleQueueUpdate(aTeamBet->ArenaMatchmakerRating, arenatype, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
-//        sBattlegroundMgr->ScheduleQueueUpdate(hTeamBet->ArenaMatchmakerRating, arenatype, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
+        // here aTeam and hTeam are ready
+//        sBattlegroundMgr->ScheduleQueueUpdate(aTeam->ArenaMatchmakerRating, arenatype, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
+//        sBattlegroundMgr->ScheduleQueueUpdate(hTeam->ArenaMatchmakerRating, arenatype, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
         // after teams are made we can generate arena battleground
         Battleground *arena = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry,
                                                                       arenatype, true);
-
+        if (!arena) {
+            TC_LOG_ERROR("bg.battleground",
+                         "BattlegroundQueue::Update couldn't create arena instance for rated arena match!");
+            return;
+        } else {
+            TC_LOG_INFO("server.worldserver", "arena created successfully");
+        }
         // start arena
-        arena->SetArenaMatchmakerRating(ALLIANCE, aTeamBet->ArenaMatchmakerRating);
-        arena->SetArenaMatchmakerRating(HORDE, hTeamBet->ArenaMatchmakerRating);
-        InviteGroupToBG(aTeamBet, arena, ALLIANCE);
-        InviteGroupToBG(hTeamBet, arena, HORDE);
+        arena->SetArenaMatchmakerRating(ALLIANCE, aTeam->ArenaMatchmakerRating);
+        arena->SetArenaMatchmakerRating(HORDE, hTeam->ArenaMatchmakerRating);
+        InviteGroupToBG(aTeam, arena, ALLIANCE);
+        InviteGroupToBG(hTeam, arena, HORDE);
 
-        TC_LOG_INFO("server.worldserver", "Starting rated arena match with bracket id %u", custom_bracket);
+        TC_LOG_INFO("server.worldserver", "Starting rated arena match with bracket id %u", bracket_id);
         arena->StartBattleground();
 
     }
