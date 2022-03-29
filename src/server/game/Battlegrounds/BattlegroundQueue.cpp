@@ -1106,6 +1106,8 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
         BattlegroundQueue &bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
         bg->SetRated(true);
 
+        TC_LOG_INFO("server.worldserver", "Passed bg, bgQueueTypeId, bgQueue");
+
         PvPDifficultyEntry const *bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), leaderPlayerTeam1->GetLevel());
         BattlegroundBracketId bracket_id = bracketEntry->GetBracketId();
 
@@ -1125,10 +1127,12 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 arenaslot = 2;
                 break;
         }
+
         uint32 aTeamid1 = leaderPlayerTeam1->GetArenaTeamId(arenaslot);
         uint32 aTeamid2 = leaderPlayerTeam2->GetArenaTeamId(arenaslot);
+        TC_LOG_INFO("server.worldserver", "Passed GroupJoinBattlegroundResult, aTeamid");
         GroupQueueInfo *aTeam = bgQueue.AddGroup(leaderPlayerTeam1, grpTeam1, bgTypeId, bracketEntry, arenatype, true, false, at1->GetRating(), at1->GetAverageMMR(grpTeam1), aTeamid1, at1->GetPreviousOpponents());
-
+        TC_LOG_INFO("server.worldserver", "Passed aTeam");
         {
             for (GroupReference *itr = grpTeam1->GetFirstMember(); itr != nullptr; itr = itr->next()) {
                 Player *member = itr->GetSource();
@@ -1145,7 +1149,7 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 member->SendDirectMessage(&data);
             }
         }
-
+        TC_LOG_INFO("server.worldserver", "Passed aTeam group");
         GroupQueueInfo *hTeam = bgQueue.AddGroup(leaderPlayerTeam2, grpTeam2, bgTypeId, bracketEntry, arenatype, true, false, at2->GetRating(), at2->GetAverageMMR(grpTeam2), aTeamid2, at2->GetPreviousOpponents());
 
         {
