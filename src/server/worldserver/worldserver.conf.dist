@@ -67,6 +67,14 @@
 RealmID = 1
 
 #
+#   CustomArena
+#   CustomArena.Path: path to the file where new arena joins should be read from
+#   CustomArena.Path.Output: path to the file where new are joins result should be written to
+
+CustomArena.Path = "./arena.txt"
+CustomArena.Path.Output = "./arena_o.txt"
+
+#
 #    DataDir
 #        Description: Data directory setting.
 #        Important:   DataDir needs to be quoted, as the string might contain space characters.

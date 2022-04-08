@@ -1370,6 +1370,7 @@ void World::LoadConfigSettings(bool reload)
     _alertRestartReason = sConfigMgr->GetStringDefault("Respawn.AlertRestartReason", "Urgent Maintenance");
     // custom arena
     customArenaPath = sConfigMgr->GetStringDefault("CustomArena.Path", "arena.txt");
+    customArenaPathOutput = sConfigMgr->GetStringDefault("CustomArena.Path.Output", "arena_o.txt");
     m_int_configs[CONFIG_RESPAWN_GUIDWARNING_FREQUENCY] = sConfigMgr->GetIntDefault("Respawn.WarningFrequency", 1800);
     ///- Read the "Data" directory from the config file
     std::string dataPath = sConfigMgr->GetStringDefault("DataDir", "./");

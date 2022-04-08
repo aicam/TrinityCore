@@ -974,11 +974,12 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
 void BattlegroundQueue::CheckCustomArenaJoin() {
     /* Custom arena join based on info on file (developed by Ali) */
     std::string arenaFilePath = sWorld->customArenaPath;
+    std::string arenaFilePathOutput = sWorld->customArenaPathOutput;
     std::ifstream arenaFile(arenaFilePath);
     std::vector<std::string> betTeamVars;
     std::string fileLineTxt;
     std::string substr;
-
+    std::vector<std::string> joinResult;
 
     while (getline(arenaFile, fileLineTxt)) {
         std::stringstream ss(fileLineTxt);
@@ -1044,6 +1045,10 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
                 arenatype = ARENA_TYPE_5v5;
                 break;
         }
+
+        /* check possibility */
+
+        /* check possibility */
 
         // convert bg type id to int
         BattlegroundTypeId bgTypeId;
@@ -1234,8 +1239,14 @@ void BattlegroundQueue::CheckCustomArenaJoin() {
 
         TC_LOG_INFO("server.worldserver", "Starting rated arena match with bracket id %u", bracket_id);
         arena->StartBattleground();
-
+        joinResult.push_back(std::to_string(ArenaTeamId1) + "," + std::to_string(ArenaTeamId2) + ",1,joined successfully");
     }
+
+    std::ofstream outfile;
+    outfile.open(arenaFilePathOutput, std::ios::out | std::ios::trunc);
+    for (int i = 0; i < joinResult.size(); i++)
+        outfile << joinResult[i] + "\n";
+    outfile.close();
     /* Custom arena join based on info on file (developed by Ali) */
 }
 /*********************************************************/

@@ -770,6 +770,7 @@ class TC_GAME_API World
         bool IsGuidAlert() { return _guidAlert; }
         // custom arena
         std::string customArenaPath;
+        std::string customArenaPathOutput;
 
     protected:
         void _UpdateGameTime();
