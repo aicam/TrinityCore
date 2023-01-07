@@ -60,7 +60,9 @@ public:
             { "ticket",             HandleGoTicketCommand,                  rbac::RBAC_PERM_COMMAND_GO,             Console::No },
             { "offset",             HandleGoOffsetCommand,                  rbac::RBAC_PERM_COMMAND_GO,             Console::No },
             { "instance",           HandleGoInstanceCommand,                rbac::RBAC_PERM_COMMAND_GO,             Console::No },
-            { "boss",               HandleGoBossCommand,                    rbac::RBAC_PERM_COMMAND_GO,             Console::No }
+            { "boss",               HandleGoBossCommand,                    rbac::RBAC_PERM_COMMAND_GO,             Console::No },
+            // Customized by Ali: handle go .z
+            {"z",                   HandleGoDotZCommand,                    rbac::RBAC_PERM_COMMAND_SAVE,           Console::No },
         };
 
         static ChatCommandTable commandTable =
@@ -84,6 +86,7 @@ public:
         }
 
         // stop flight if need
+    
         if (player->IsInFlight())
             player->FinishTaxiFlight();
         else
@@ -92,6 +95,44 @@ public:
         player->TeleportTo({ mapId, pos });
         return true;
     }
+
+
+    // Customized by Ali: teleport to .z
+    //teleport at coordinates, including Z and orientation
+    static bool HandleGoDotZCommand(ChatHandler* handler) //float x, float y, Optional<float> z, Optional<uint32> id, Optional<float> o
+    {
+        float o = 3.73615;
+        float x = 4305.78;
+        float y = -2758.3;
+        float z = 16.6319;
+        Player* player = handler->GetSession()->GetPlayer();
+        uint32 mapId = 0;
+
+        // if (z)
+        // {
+        //     if (!MapManager::IsValidMapCoord(mapId, x, y, *z))
+        //     {
+        //         handler->PSendSysMessage(LANG_INVALID_TARGET_COORD, x, y, mapId);
+        //         handler->SetSentErrorMessage(true);
+        //         return false;
+        //     }
+        // }
+        // else
+        // {
+        //     if (!MapManager::IsValidMapCoord(mapId, x, y))
+        //     {
+        //         handler->PSendSysMessage(LANG_INVALID_TARGET_COORD, x, y, mapId);
+        //         handler->SetSentErrorMessage(true);
+        //         return false;
+        //     }
+        //     Map const* map = sMapMgr->CreateBaseMap(mapId);
+        //     z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
+        // }
+        
+        return DoTeleport(handler, { x, y, z, o }, mapId);
+    }
+
+
 
     static bool HandleGoCreatureSpawnIdCommand(ChatHandler* handler, Variant<Hyperlink<creature>, ObjectGuid::LowType> spawnId)
     {
